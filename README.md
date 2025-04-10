@@ -33,12 +33,22 @@ MacOS: `git --version`
 
 ## Installation
 
-You can install the `DNSLookup` tool directly from GitHub using `pip`:
+1.  **Prerequisites:** Ensure you have Python 3.7+ and Git installed and available in your system's PATH.
+2.  **Install via pip:** Open your terminal (Command Prompt, PowerShell, Bash, etc.) and run:
 
-```bash
-pip install git+https://github.com/ThegenJackson/DNSLookup.git
-```
+    ```bash
+    pip install git+https://github.com/ThegenJackson/DNSLookup.git
+    ```
 
+> **Important Note for Windows Users (PATH Environment Variable):**
+>
+> After installation, you might see a **WARNING** message in your terminal similar to this:
+> ```
+> WARNING: The script dnslookup.exe is installed in 'C:\Users\YourUsername\AppData\Roaming\Python\Python312\Scripts' which is not on PATH.
+> ```
+> If you see this warning, the `dnslookup` command will **not** work immediately because Windows doesn't know where to find the executable.
+>
+> To resolve this **copy the exact directory path** shown in *your* warning message (e.g., `C:\Users\YourUsername\AppData\Roaming\Python\Python312\Scripts`) and **add this path** to your Windows **PATH Environment Variable**.
 
 ## Usage
 
