@@ -5,7 +5,28 @@ import tldextract
 import whois
 import dns.resolver
 import socket
-from typing import List, Tuple, Optional, Any
+from typing import List, Tuple, Optional, Any, Dict
+
+
+# Dictionary of common Selectors for checking DKIM Records 
+# (Add more as needed from major providers like SendGrid, Mailgun, etc.)
+COMMON_DKIM_SELECTORS = [
+    "google",      # Google Workspace
+    "selector1",   # Microsoft 365, others
+    "selector2",   # Microsoft 365, others
+    "k1",          # General/Common
+    "k2",          # General/Common
+    "k3",          # General/Common
+    "default",     # Common fallback
+    "m1",          # Mailchimp? Others?
+    "mandrill",    # Mandrill (Mailchimp Transactional)
+    "dkim",        # Generic
+    "zoho",        # Zoho Mail
+    "s1",          # SendGrid? Generic?
+    "s2",          # SendGrid? Generic?
+    "email",       # SendGrid? Generic?
+]
+
 
 # Helper function to safely get WHOIS data
 def get_whois_info(domain: str) -> Optional[Any]:
@@ -150,11 +171,36 @@ def check_spf(domain: str) -> Tuple[Optional[str], Optional[str]]:
     return spf_record, None # Return found record, no error
 
 
+def check_common_dkim(domain: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
+    """
+    Checks for DKIM TXT records using a list of common selectors.
+    Returns a dictionary of found {selector: [records]} and an optional general error message.
+    Specific 'selector not found' errors are ignored.
+    """
+    found_dkim: Dict[str, List[str]] = {}
+    general_error: Optional[str] = None
+
+    for selector in COMMON_DKIM_SELECTORS:
+        dkim_domain = f"{selector}._domainkey.{domain}"
+        records, error_msg = get_dns_records(dkim_domain, 'TXT')
+
+        if records:
+            found_dkim[selector] = records
+        elif error_msg:
+            # Only store general errors, ignore NXDOMAIN/NoAnswer which mean the selector just doesn't exist
+            is_specific_not_found = "NXDOMAIN" in error_msg or "No TXT records found" in error_msg
+            if not is_specific_not_found and not general_error:
+                # Store the first general error encountered (like Timeout)
+                general_error = f"Error during DKIM lookups ({selector}): {error_msg}"
+
+    return found_dkim, general_error
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="""
 Get DNS and WHOIS info for a domain using Python libraries.
-Optionally check common email authentication records (DMARC, SPF).
+Optionally check common email authentication records (SPF, DMARC, DKIM).
 
 Default outputs the Registrant, Registrar, Nameservers, and inferred
 DNS Hosting Provider (Registrar of the nameserver's owner domain).
@@ -172,7 +218,7 @@ Definitions:
     parser.add_argument(
         "-m", "--mail-authentication",
         action="store_true", # Set to True if flag is present
-        help="Check for DMARC and SPF records."
+        help="Check for SPF, DMARC and DKIM records."
     )
     args = parser.parse_args()
     domain_to_check = args.domain.lower().strip() # Normalize domain
@@ -259,16 +305,26 @@ Definitions:
         dmarc_records, dmarc_error = get_dns_records(dmarc_domain, 'TXT')
         if dmarc_error and not dmarc_records: print(f"\nDMARC ({dmarc_domain}): \nError - {dmarc_error}")
         elif dmarc_records: print(f"\nDMARC ({dmarc_domain}): \n{dmarc_records[0]}") # Display first DMARC found
-        else: print(f"\nDMARC ({dmarc_domain}): Not Found")
+        else: print(f"\nDMARC ({dmarc_domain}): \nNot Found")
 
         # SPF Check using helper function
         spf_record, spf_error = check_spf(domain_to_check)
         if spf_error: print(f"\nSPF ({domain_to_check}): \nError - {spf_error}")
         elif spf_record: print(f"\nSPF ({domain_to_check}): \n{spf_record}")
-        else: print(f"\nSPF ({domain_to_check}): Not Found")
+        else: print(f"\nSPF ({domain_to_check}): \nNot Found")
 
-        # DKIM Explanation # Fix later
-        print("\nDKIM: \nRequires a 'selector' to check (e.g., selector._domainkey.domain). Cannot check automatically.")
+        # DKIM Check (Using Common Selectors)
+        found_dkim, dkim_general_error = check_common_dkim(domain_to_check)
+        if dkim_general_error:
+            print(f"\nDKIM: \n{dkim_general_error}") # Report general lookup errors if any
+        if found_dkim:
+            print("\nDKIM:")
+            for selector, records in found_dkim.items():
+                for record in records:
+                    print(f"Selector '{selector}': {record[:80]}{'...' if len(record) > 80 else ''}") # Truncate long keys
+        elif not dkim_general_error: # Only print 'not found' if there wasn't a general error
+            print("\nDKIM: \nNo records found using common selectors.")
+        print("\n(Note: This only checks common selectors, others may exist.)")
 
     print(f"\n--- Check Complete for: {domain_to_check} ---")
 

@@ -13,7 +13,7 @@ A command-line tool to quickly retrieve essential DNS, WHOIS, and basic Email Au
 *   **Optional:** Checks basic **Email Authentication** records:
     *   **DMARC** (`_dmarc` TXT record)
     *   **SPF** (TXT record starting `v=spf1`)
-    *   Provides note about DKIM lookup requirements.
+    *   **DKIM** (Attempts to find records using a list of common selectors like `google`, `selector1`, `k1`, etc.)
 
 
 ## Prerequisites
@@ -74,6 +74,21 @@ Including the `-m` or `--mail-authentication` flag outputs basic Email Authentic
 
 Example usage: `dnslookup google.com -m` or `dnslookup google.com --mail-authentication`
 
+
+### Output Explanation
+
+The tools default output displays basic domain and DNS info:
+* Domain Registrant: Owner from WHOIS.
+* Domain Registrar: Company managing registration (WHOIS).
+* Nameservers: Authoritative servers from DNS (NS records).
+* Inferred DNS Hosting Provider: Registrar/Org of the NS owner domain (WHOIS).
+
+If the `-m` or `--mail-authentication` flag is used, it also outputs:
+* DMARC: The content of the TXT record found at `_dmarc.<domain_name>`, or "Not Found" / Error message.
+* SPF: The content of the TXT record for `<domain_name>` starting with `v=spf1`, or "Not Found" / Error message.
+* DKIM: Any DKIM TXT records found by querying `{selector}._domainkey.<domain_name>` using a predefined list of common selectors (e.g., `google`, `selector1`, `k1`).  
+If records are found, the selector used will be displayed. If none are found using the common list, it will report that.
+    * Note: This check is not exhaustive. Domains may use custom DKIM selectors that are not in the common list and therefore will not be found by this tool.
 
 ## License
 

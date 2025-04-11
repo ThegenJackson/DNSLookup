@@ -22,7 +22,7 @@ setuptools.setup(
     name="dns-lookup-tool",
     version="1.1",
     author="Thegen Jackson",
-    description="Get DNS, WHOIS, and basic Email Authentication info using python-whois and dnspython.",
+    description="Get DNS, WHOIS, and basic Email Authentication (SPF, DMARC, common DKIM Selectors) info using python-whois and dnspython.",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     url="https://github.com/ThegenJackson/DNSLookup",
