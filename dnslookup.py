@@ -202,15 +202,24 @@ def main():
 Get DNS and WHOIS info for a domain using Python libraries.
 Optionally check common email authentication records (SPF, DMARC, DKIM).
 
-Default outputs the Registrant, Registrar, Nameservers, and inferred
-DNS Hosting Provider (Registrar of the nameserver's owner domain).
+Outputs basic info by default. Use -m for Email Authentication checks.
 
-Definitions:
+Default Output Definitions:
   - Registrant: The person or organisation who registered the domain.
   - Registrar: The company managing the domain's registration.
   - Nameservers: The Authoritative DNS Servers listed for the domain.
   - DNS Hosting Provider: The platform inferred to host the DNS Records
     (determined by WHOIS lookup on the nameserver's owner domain).
+
+Email Authentication (-m) Definitions:
+  - DMARC: (Domain-based Message Authentication, Reporting, and Conformance)
+           A policy (TXT record at _dmarc.) telling receiving servers how
+           to handle messages failing SPF/DKIM checks (reject, quarantine, none).
+  - SPF:   (Sender Policy Framework) A TXT record listing authorised servers
+           allowed to send email on behalf of the domain. Helps prevent spoofing.
+  - DKIM:  (DomainKeys Identified Mail) A digital signature (added by sending
+           server, key published in DNS TXT at selector._domainkey.) verifying
+           message integrity and origin. Tool checks common selectors.
 """,
         formatter_class=argparse.RawTextHelpFormatter
     )
