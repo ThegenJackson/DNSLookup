@@ -63,7 +63,10 @@ def get_dns_records(domain: str, record_type: str) -> Tuple[List[str], Optional[
 
         # Process the found records
         for rdata in answer:
-            record_text = rdata.to_text().rstrip('.') # Clean trailing dot
+            record_text = rdata.to_text().strip().rstrip('.') # Clean trailing dot
+            if record_type == 'TXT' and record_text.startswith('"') and record_text.endswith('"'):
+                 # Remove surrounding quotes and handle potential internal quote escaping
+                 record_text = record_text[1:-1].replace('\\"', '"').replace('\\\\', '\\')
             records.append(record_text)
 
     except dns.resolver.NXDOMAIN:
@@ -119,12 +122,41 @@ def get_registrable_domain(fqdn: str) -> Optional[str]:
         return None
 
 
+# SPF check (filters TXT)
+def check_spf(domain: str) -> Tuple[Optional[str], Optional[str]]:
+    """Checks for SPF record (TXT starting with 'v=spf1')."""
+    txt_records, error_msg = get_dns_records(domain, 'TXT')
+    if error_msg and not txt_records:
+        return None, error_msg # Return error if lookup failed entirely
+
+    spf_record = None
+    for record in txt_records:
+        # Use lower() for case-insensitive check, but return original case
+        if record.lower().startswith("v=spf1"):
+            spf_record = record # Found it
+            break # Assume only one primary SPF per domain spec
+
+    # Handle case where TXT records exist but none are SPF
+    if not spf_record and txt_records:
+        return None, None # No SPF record found among existing TXT
+
+    # Handle case where get_dns_records returned an error _or_ no TXT found
+    if not spf_record and not txt_records:
+        if error_msg and "No TXT records found" not in error_msg:
+             return None, error_msg # Return original lookup error
+        else:
+             return None, None # Explicitly no SPF found
+
+    return spf_record, None # Return found record, no error
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="""
 Get DNS and WHOIS info for a domain using Python libraries.
+Optionally check common email authentication records (DMARC, SPF).
 
-Outputs the Registrant, Registrar, Nameservers, and inferred
+Default outputs the Registrant, Registrar, Nameservers, and inferred
 DNS Hosting Provider (Registrar of the nameserver's owner domain).
 
 Definitions:
@@ -137,6 +169,11 @@ Definitions:
         formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument("domain", help="The domain name to check (e.g., example.com)")
+    parser.add_argument(
+        "-m", "--mail-authentication",
+        action="store_true", # Set to True if flag is present
+        help="Check for DMARC and SPF records."
+    )
     args = parser.parse_args()
     domain_to_check = args.domain.lower().strip() # Normalize domain
 
@@ -214,6 +251,24 @@ Definitions:
 
     print(f"Inferred DNS Hosting Provider: {ns_registrar_info}")
 
+    if args.mail_authentication:
+        print("\n--- Email Authentication ---")
+
+        # DMARC Check
+        dmarc_domain = f"_dmarc.{domain_to_check}"
+        dmarc_records, dmarc_error = get_dns_records(dmarc_domain, 'TXT')
+        if dmarc_error and not dmarc_records: print(f"\nDMARC ({dmarc_domain}): \nError - {dmarc_error}")
+        elif dmarc_records: print(f"\nDMARC ({dmarc_domain}): \n{dmarc_records[0]}") # Display first DMARC found
+        else: print(f"\nDMARC ({dmarc_domain}): Not Found")
+
+        # SPF Check using helper function
+        spf_record, spf_error = check_spf(domain_to_check)
+        if spf_error: print(f"\nSPF ({domain_to_check}): \nError - {spf_error}")
+        elif spf_record: print(f"\nSPF ({domain_to_check}): \n{spf_record}")
+        else: print(f"\nSPF ({domain_to_check}): Not Found")
+
+        # DKIM Explanation # Fix later
+        print("\nDKIM: \nRequires a 'selector' to check (e.g., selector._domainkey.domain). Cannot check automatically.")
 
     print(f"\n--- Check Complete for: {domain_to_check} ---")
 

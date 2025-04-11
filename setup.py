@@ -13,17 +13,16 @@ def get_long_description(file_path='README.md'):
         with open(file_path, 'r', encoding='utf-8') as f:
             return f.read()
     # Fallback description if README.md doesn't exist
-    return 'A tool to query DNS and WHOIS information for domains using native Python libraries.'
+    return 'A tool to query DNS, WHOIS, and Email Authentication information for domains using native Python libraries.' # Updated fallback
 
 # Package Metadata
 setuptools.setup(
     # How the package will be named (e.g., pip install dns-lookup-tool)
     # Use hyphens here. Cannot be the same as the module name 'dnslookup'.
     name="dns-lookup-tool",
-    version="1.0",                    # Increment version from previous examples
-    author="Thegen Jackson", # Replace with appropriate attribution
-    author_email="@example.com", # Replace with your email
-    description="Get DNS and WHOIS info using python-whois and dnspython.",
+    version="1.1",
+    author="Thegen Jackson",
+    description="Get DNS, WHOIS, and basic Email Authentication info using python-whois and dnspython.",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     url="https://github.com/ThegenJackson/DNSLookup",
@@ -37,7 +36,7 @@ setuptools.setup(
     install_requires=get_requirements(),
 
     # Command-Line Script Definition
-    # This creates the 'dnslookup' command that points to your main function
+    # This creates the 'dnslookup' command that points to the main function
     entry_points={
         'console_scripts': [
             # command_name = module_name:function_name

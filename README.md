@@ -1,15 +1,19 @@
 # DNSLookup Tool
 
-A command-line tool to quickly retrieve essential DNS and WHOIS information for a given domain using native Python libraries. Designed for MSPs and IT professionals needing to investigate domain configurations without relying on external command-line utilities like `dig` or `whois`.
+A command-line tool to quickly retrieve essential DNS, WHOIS, and basic Email Authentication information for a given domain using native Python libraries. Designed for MSPs and IT professionals needing to investigate domain configurations without relying on external command-line utilities like `dig` or `whois`.
 
 
 ## Features
 
-*   **Platform Independent:** Runs anywhere Python runs
+*   **Platform Independent:** Runs anywhere Python runs.
 *   Retrieves **Domain Registrant** (Registered owner name/organization).
 *   Retrieves **Domain Registrar** (The company managing the domain registration).
 *   Lists **Authoritative Nameservers** (NS Records) for the domain.
 *   Infers the **DNS Hosting Provider** by performing a WHOIS lookup on the *owner domain* of the primary nameserver.
+*   **Optional:** Checks basic **Email Authentication** records:
+    *   **DMARC** (`_dmarc` TXT record)
+    *   **SPF** (TXT record starting `v=spf1`)
+    *   Provides note about DKIM lookup requirements.
 
 
 ## Prerequisites
@@ -40,6 +44,12 @@ MacOS: `git --version`
     pip install git+https://github.com/ThegenJackson/DNSLookup.git
     ```
 
+    *To update an existing installation:*
+
+    ```bash
+    pip install --upgrade git+https://github.com/ThegenJackson/DNSLookup.git
+    ```
+
 > **Important Note for Windows Users (PATH Environment Variable):**
 >
 > After installation, you might see a **WARNING** message in your terminal similar to this:
@@ -50,13 +60,19 @@ MacOS: `git --version`
 >
 > To resolve this **copy the exact directory path** shown in *your* warning message (e.g., `C:\Users\YourUsername\AppData\Roaming\Python\Python312\Scripts`) and **add this path** to your Windows **PATH Environment Variable**.
 
+
 ## Usage
 
-Run the tool from your command line, providing the domain name you want to check as an argument:
+Run the tool from your command line, providing the domain name you want to check as an argument. Optionally include the mail authentication flag.
 
 `dnslookup <domain_name>`
 
 Example usage: `dnslookup google.com`
+
+
+Including the `-m` or `--mail-authentication` flag outputs basic Email Authentication checks for SPF and DMARC
+
+Example usage: `dnslookup google.com -m` or `dnslookup google.com --mail-authentication`
 
 
 ## License
