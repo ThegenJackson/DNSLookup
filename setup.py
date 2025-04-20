@@ -17,30 +17,30 @@ def get_long_description(file_path='README.md'):
 
 # Package Metadata
 setuptools.setup(
-    # How the package will be named (e.g., pip install dns-lookup-tool)
-    # Use hyphens here. Cannot be the same as the module name 'dnslookup'.
-    name="dns-lookup-tool",
+    # How the package will be named (e.g., pip install domain-peek-tool)
+    # Use hyphens here. Cannot be the same as the module name 'domainpeek'.
+    name="domain-peek-tool",
     version="1.1",
     author="Thegen Jackson",
     description="Get DNS, WHOIS, and basic Email Authentication (SPF, DMARC, common DKIM Selectors) info using python-whois and dnspython.",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
-    url="https://github.com/ThegenJackson/DNSLookup",
+    url="https://github.com/nulltree-software/domainpeek",
     license="MIT",
 
     # Package Configuration
-    # Tells setuptools your code is in a single file named dnslookup.py
-    py_modules=["dnslookup"],
+    # Tells setuptools your code is in a single file named domainpeek.py
+    py_modules=["domainpeek"],
 
     # Dependencies needed for the script to run
     install_requires=get_requirements(),
 
     # Command-Line Script Definition
-    # This creates the 'dnslookup' command that points to the main function
+    # This creates the 'domainpeek' command that points to the main function
     entry_points={
         'console_scripts': [
             # command_name = module_name:function_name
-            'dnslookup = dnslookup:main',
+            'domainpeek = domainpeek:main',
         ],
     },
 

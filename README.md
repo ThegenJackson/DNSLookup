@@ -1,4 +1,4 @@
-# DNSLookup Tool
+# DomainPeek CLI DNS Insights
 
 A command-line tool to quickly retrieve essential DNS, WHOIS, and basic Email Authentication information for a given domain using native Python libraries. Designed for MSPs and IT professionals needing to investigate domain configurations without relying on external command-line utilities like `dig` or `whois`.
 
@@ -41,22 +41,22 @@ MacOS: `git --version`
 2.  **Install via pip:** Open your terminal (Command Prompt, PowerShell, Bash, etc.) and run:
 
     ```bash
-    pip install git+https://github.com/ThegenJackson/DNSLookup.git
+    pip install git+https://github.com/nulltree-software/DomainPeek.git
     ```
 
     *To update an existing installation:*
 
     ```bash
-    pip install --upgrade git+https://github.com/ThegenJackson/DNSLookup.git
+    pip install --upgrade git+https://github.com/nulltree-software/DomainPeek.git
     ```
 
 > **Important Note for Windows Users (PATH Environment Variable):**
 >
 > After installation, you might see a **WARNING** message in your terminal similar to this:
 > ```
-> WARNING: The script dnslookup.exe is installed in 'C:\Users\YourUsername\AppData\Roaming\Python\Python312\Scripts' which is not on PATH.
+> WARNING: The script DomainPeel.exe is installed in 'C:\Users\YourUsername\AppData\Roaming\Python\Python312\Scripts' which is not on PATH.
 > ```
-> If you see this warning, the `dnslookup` command will **not** work immediately because Windows doesn't know where to find the executable.
+> If you see this warning, the `domainpeek` command will **not** work immediately because Windows doesn't know where to find the executable.
 >
 > To resolve this **copy the exact directory path** shown in *your* warning message (e.g., `C:\Users\YourUsername\AppData\Roaming\Python\Python312\Scripts`) and **add this path** to your Windows **PATH Environment Variable**.
 
@@ -65,14 +65,14 @@ MacOS: `git --version`
 
 Run the tool from your command line, providing the domain name you want to check as an argument. Optionally include the mail authentication flag.
 
-`dnslookup <domain_name>`
+`domainpeek <domain_name>`
 
-Example usage: `dnslookup google.com`
+Example usage: `domainpeek google.com`
 
 
 Including the `-m` or `--mail-authentication` flag outputs basic Email Authentication checks for SPF and DMARC
 
-Example usage: `dnslookup google.com -m` or `dnslookup google.com --mail-authentication`
+Example usage: `domainpeek google.com -m` or `domainpeek google.com --mail-authentication`
 
 
 ### Output Explanation
